@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>indev visualizer</title>
+    <script src="https://d3js.org/d3.v4.js"></script>
+  </head>
+  <body>
+    <form action="/action_page.php">
+    <input type="file" id="myFile" name="filename">
+    </form>
+    <button onclick="fileSubmitted()">Submit File</button>
+  </br>
+    <button onclick="boxplot()">boxplot</button>
+    <div id="my_dataviz"></div>
+    <button onclick="barplot()">barplot</button>
+    <div id="my_dataviz2"></div>
+    <button onclick="dotplot()">dotplot</button>
+    <div id="my_dataviz3"></div>
+
+    <div></div>
+    <button onclick="clearGraphs()">clear</button>
+  </body>
+  <script src = "test.js"></script>
+</html>
