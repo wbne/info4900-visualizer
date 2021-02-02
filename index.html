@@ -4,22 +4,44 @@
     <meta charset="utf-8">
     <title>indev visualizer</title>
     <script src="https://d3js.org/d3.v4.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/holtzy/D3-graph-gallery@master/LIB/d3.layout.cloud.js"></script>
   </head>
+  <header>
+    <p>TODO: tie the variables with the graphing</p>
+    <p>clean up stuff</p>
+    <p>add legends using keys</p>
+  </header>
   <body>
-    <form action="/action_page.php">
+    <form>
     <input type="file" id="myFile" name="filename">
     </form>
     <button onclick="fileSubmitted()">Submit File</button>
+    <div id="variableCount">
+      <p>How many variables do you want to graph?</p>
+      <input type="radio" id="oneVar" value=1 name="radio" onclick="variableCount()">
+      <label>One Variable</label>
+      <input type="radio" id="twoVar" value=2 name="radio" onclick="variableCount()">
+      <label>Two Variable</label>
+      <input type="radio" id="other" value=-1 name="radio" onclick="variableCount()">
+      <label>All Variables</label>
+    </div>
+  <br>
   </br>
+  <div id="varWrapper" hidden=true>
+  <p>Choose which variables wil be graphed</p>
+    <div id="variables"></div>
+  </div>
+   <br><br>
     <button onclick="boxplot()">boxplot</button>
-    <div id="my_dataviz"></div>
     <button onclick="barplot()">barplot</button>
-    <div id="my_dataviz2"></div>
     <button onclick="dotplot()">dotplot</button>
-    <div id="my_dataviz3"></div>
+    <button onclick="wordcloud()">word cloud</button>
+    <button onclick="streamline()">streamline</button>
+    <button onclick="stacked()">stacked graph</button>
 
-    <div></div>
     <button onclick="clearGraphs()">clear</button>
+  </br>
+  <div id="graphArea"></div>
   </body>
   <script src = "test.js"></script>
 </html>
