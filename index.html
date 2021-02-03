@@ -3,15 +3,12 @@
   <head>
     <meta charset="utf-8">
     <title>indev visualizer</title>
+    <link rel="stylesheet" href="style.css">
     <script src="https://d3js.org/d3.v4.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/holtzy/D3-graph-gallery@master/LIB/d3.layout.cloud.js"></script>
   </head>
-  <header>
-    <p>TODO: tie the variables with the graphing</p>
-    <p>clean up stuff</p>
-    <p>add legends using keys</p>
-  </header>
   <body>
+    <h1>Grapher for INFO 4900</h1>
     <form>
     <input type="file" id="myFile" name="filename">
     </form>
@@ -24,24 +21,27 @@
       <label>Two Variable</label>
       <input type="radio" id="other" value=-1 name="radio" onclick="variableCount()">
       <label>All Variables</label>
+      <input type="radio" id="textVar" value=3 name="radio" onclick="variableCount()">
+      <label>Text</label>
     </div>
-  <br>
-  </br>
   <div id="varWrapper" hidden=true>
   <p>Choose which variables wil be graphed</p>
     <div id="variables"></div>
   </div>
    <br><br>
-    <button onclick="boxplot()">boxplot</button>
-    <button onclick="barplot()">barplot</button>
-    <button onclick="dotplot()">dotplot</button>
-    <button onclick="wordcloud()">word cloud</button>
-    <button onclick="streamline()">streamline</button>
-    <button onclick="stacked()">stacked graph</button>
+    <button onclick="boxplot()" id="one">boxplot</button>
+    <button onclick="barplot()" id="two">barplot</button>
+    <button onclick="dotplot()" id="two">dotplot</button>
+    <button onclick="wordcloud()" id="text">word cloud</button>
+    <button onclick="streamline()" id="all">streamline</button>
+    <button onclick="stacked()" id="all">stacked graph</button>
 
     <button onclick="clearGraphs()">clear</button>
   </br>
-  <div id="graphArea"></div>
+  <div id="wrapper">
+    <div id="graphArea"></div>
+    <div id="legend"></div>
+  </div>
   </body>
   <script src = "test.js"></script>
 </html>

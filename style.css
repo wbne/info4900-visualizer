@@ -1,0 +1,20 @@
+#legend
+{
+  width: 200px;
+  float:left;
+}
+
+#graphArea
+{
+  float: left;
+}
+
+#wrapper
+{
+  display:flex;
+}
+
+.tooltip
+{
+  position:fixed;
+}
