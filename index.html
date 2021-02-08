@@ -9,34 +9,34 @@
   </head>
   <body>
     <h1>Grapher for INFO 4900</h1>
+    <p>todo: add drag&drop feature, make look pretty, fix bug</p>
     <form>
-    <input type="file" id="myFile" name="filename">
+    <input onclick = "clearPrevious()" type="file" id="myFile" name="filename">
     </form>
     <button onclick="fileSubmitted()">Submit File</button>
-    <div id="variableCount">
-      <p>How many variables do you want to graph?</p>
-      <input type="radio" id="oneVar" value=1 name="radio" onclick="variableCount()">
-      <label>One Variable</label>
-      <input type="radio" id="twoVar" value=2 name="radio" onclick="variableCount()">
-      <label>Two Variable</label>
-      <input type="radio" id="other" value=-1 name="radio" onclick="variableCount()">
-      <label>All Variables</label>
-      <input type="radio" id="textVar" value=3 name="radio" onclick="variableCount()">
-      <label>Text</label>
-    </div>
+    <br>
   <div id="varWrapper" hidden=true>
-  <p>Choose which variables wil be graphed</p>
-    <div id="variables"></div>
+  <p>Choose which variables will be graphed</p>
+    <div id="variables">
+    </div>
+    <div id="extraVariables">
+      <button onclick="uncheckCheckbox(false)" id="allVar">All</button>
+      <button onclick="uncheckCheckbox(true)" id="noneVar">None</button>
+      <button onclick="textOption(); unwrap()" id="textVar">Text</button>
+    </div>
   </div>
-   <br><br>
-    <button onclick="boxplot()" id="one">boxplot</button>
-    <button onclick="barplot()" id="two">barplot</button>
-    <button onclick="dotplot()" id="two">dotplot</button>
-    <button onclick="wordcloud()" id="text">word cloud</button>
-    <button onclick="streamline()" id="all">streamline</button>
-    <button onclick="stacked()" id="all">stacked graph</button>
+  <br>
+  <div id="graphButtons">
+    <button onclick="boxplot(); unwrap()" id="one">boxplot</button>
+    <button onclick="barplot(); unwrap()" id="two">barplot</button>
+    <button onclick="dotplot(); unwrap()" id="two">dotplot</button>
+    <button onclick="wordcloud(); unwrap()" id="text">word cloud</button>
+    <button onclick="linegraph(); unwrap()" id="all">line graph</button>
+    <button onclick="streamline(); unwrap()" id="all">streamline</button>
+    <button onclick="stacked(); unwrap()" id="all">stacked graph</button>
 
     <button onclick="clearGraphs()">clear</button>
+  </div>
   </br>
   <div id="wrapper">
     <div id="graphArea"></div>
