@@ -1,6 +1,6 @@
 body
 {
-  background-color: #DDD;
+  background-color: #FFF;
   font-family: 'helvetica';
   text-align: center;
 }
@@ -12,8 +12,8 @@ p
 
 button
 {
-  background-color: rgba(0, 0, 0, 0);
-  border: 2px solid #333;
+  background-color: #9bf6ff;
+  border: 2px solid #3b868f;
   color: #333;
   padding: 15px 32px;
   text-align: center;
@@ -24,15 +24,14 @@ button
 
 button:hover
 {
-  background-color: rgba(0,0,0,.5);
+  background-color: #7bd6df;
   cursor: pointer;
 }
 
 button:disabled
 {
-  background-color: rgba(0,0,0,.5);
+  background-color: #5bb6bf;
   color: #333;
-  border: 2px solid #111;
   cursor: not-allowed;
 }
 
@@ -50,6 +49,13 @@ button:disabled
 {
   width: 50%;
   margin-left: 30%;
+}
+
+.link
+{
+  stroke: #999;
+  stroke-opacity: .6;
+  stroke-width: 1px;
 }
 
 /* Customize the label (the container) */

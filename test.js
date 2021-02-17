@@ -6,6 +6,7 @@ var varNum = 0
 var selectedValue = 0
 var newFile = true
 var selectedData = []
+var fileExtension
 const graphWidth  = (window.innerWidth || document.documentElement.clientWidth ||
 document.body.clientWidth) / 2;
 const graphHeight = (window.innerHeight|| document.documentElement.clientHeight||
@@ -14,7 +15,9 @@ disableGraphs()
 
 function fileSubmitted()
 {
+  selectedValue = 0
   clearGraphs()
+  disableGraphs()
   file = document.getElementById("myFile");
   newFile = true
   document.getElementById("varWrapper").hidden = true
@@ -24,11 +27,20 @@ function fileSubmitted()
   var rawFile = file.files[0]
   var reader = new FileReader()
   reader.addEventListener('load', function(e){
-      let text = e.target.result
-      rawText = text
-      loadVariables() //test
-
-      document.getElementById("varWrapper").hidden = false //test
+      var tempA = document.getElementById("myFile").value.split(".")
+      fileExtension = tempA[tempA.length - 1]
+      rawText = e.target.result
+      if(fileExtension != "txt" && fileExtension != "json")
+      {
+        loadVariables()
+        document.getElementById("text").disabled = true
+        document.getElementById("network").disabled = true
+        document.getElementById("varWrapper").hidden = false
+      }
+      if(fileExtension == "txt")
+      {document.getElementById("text").disabled = false}
+      if(fileExtension == "json")
+      {document.getElementById("network").disabled = false}
   })
   reader.readAsText(rawFile)
 
@@ -60,7 +72,7 @@ function disableGraphs()
 
   allBut = document.querySelectorAll('#all')
   for(i = 0; i < allBut.length; i++){
-    if(selectedValue < 3)
+    if(selectedValue <= 0)
     {allBut[i].disabled = true}
     else
     {allBut[i].disabled = false}
@@ -572,12 +584,7 @@ var color = d3.scaleOrdinal()
   .domain(keys)
   .range(tempColors)
 
-  // group the data: I want to draw one line per group
-  //var sumstat = d3.nest() // nest function allows to group the calculation per level of a factor
-  //  .keys(keys)
-  //  .entries(data);
-
-  // Add X axis --> it is a date format
+  // Add X axis
   var x = d3.scaleLinear()
     .domain(d3.extent(data, function(d) {return +d[data.columns[0]]; }))
     .range([ 0, width ]);
@@ -592,14 +599,8 @@ var color = d3.scaleOrdinal()
   svg.append("g")
     .call(d3.axisLeft(y));
 
-for(i = 0; i < data.length; i++)
-{
-  for(j = 0; j < keys.length; j++)
-  {//console.log(data[i][keys[j]])
-  }
-}
   // Draw the line
-  for(i = 1; i < keys.length; i++)
+  for(i = 1; i <= keys.length; i++)
   {
   svg.selectAll(".line")
       .data([data])
@@ -610,19 +611,93 @@ for(i = 0; i < data.length; i++)
           .y(function(d){return y(+d[data.columns[selectedData[i]]]) })
       )
         .attr("fill", "none")
-        .attr("stroke", function(d){ return tempColors[i] })
+        .attr("stroke", function(d){ return tempColors[i-1] })
         .attr("stroke-width", 3)
   }
 
   divlegend = document.getElementById("legend")
-  for(i = 0; i < keys.length; i++)
+  for(i = 1; i < selectedData.length; i++)
   {
     legend = document.createElement("p")
-    legend.textContent = keys[i]
-    legend.style.backgroundColor = color(keys[i])
+    legend.textContent = data.columns[selectedData[i]]
+    legend.style.backgroundColor = tempColors[i-1]
     legend.style.width = "200px"
     legend.style.padding = "10px"
 
     divlegend.append(legend)
   }
 }
+
+var link, node, edgepaths;
+function network()
+{
+  clearGraphs()
+
+  var margin = {top: 20, right: 30, bottom: 30, left: 60},
+      width = graphWidth - margin.left - margin.right,
+      height = 1.3*graphHeight - margin.top - margin.bottom;
+
+var colors = d3.scaleOrdinal(d3.schemeCategory10)
+
+var simulation = d3.forceSimulation()
+        .force("link", d3.forceLink().id(function (d) {return d.id;}).distance(100).strength(1))
+        .force("charge", d3.forceManyBody())
+        .force("center", d3.forceCenter(width / 2, height / 2));
+
+var svg = d3.select(g)
+  .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform",
+          "translate(" + margin.left + "," + margin.top + ")");
+
+var json = JSON.parse(rawText)
+console.log(json)
+  link = svg.selectAll(".link")
+          .data(json.links)
+          .enter()
+          .append("line")
+          .attr("class", "link")
+
+      edgepaths = svg.selectAll(".edgepath")
+          .data(json.links)
+          .enter()
+          .append('path')
+          .style("pointer-events", "none")
+          .attr('class', 'edgepath')
+          .attr('fill-opacity', 0)
+          .attr('stroke-opacity', 0);
+
+      node = svg.selectAll(".node")
+          .data(json.nodes)
+          .enter()
+          .append("g")
+          .attr("class", "node")
+      node.append("circle")
+          .attr("r", 5)
+          .style("fill", function (d, i) {return colors(i);})
+      node.append("text")
+          .attr("dy", -3)
+          .text(function (d) {return d.name;});
+      simulation
+          .nodes(json.nodes)
+          .on("tick", ticked)
+      simulation.force("link")
+          .links(json.links);
+}
+
+function ticked() {
+        link
+            .attr("x1", function (d) {return d.source.x;})
+            .attr("y1", function (d) {return d.source.y;})
+            .attr("x2", function (d) {return d.target.x;})
+            .attr("y2", function (d) {return d.target.y;});
+
+        node
+            .attr("transform", function (d) {return "translate(" + d.x + ", " + d.y + ")";});
+
+        edgepaths.attr('d', function (d) {
+            return 'M ' + d.source.x + ' ' + d.source.y + ' L ' + d.target.x + ' ' + d.target.y;
+        });
+    }
