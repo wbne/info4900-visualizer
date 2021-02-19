@@ -20,7 +20,6 @@ function fileSubmitted()
   disableGraphs()
   file = document.getElementById("myFile");
   newFile = true
-  document.getElementById("varWrapper").hidden = true
   var div = document.getElementById('variables')
   while(div.firstChild){div.removeChild(div.firstChild)}
 
@@ -35,7 +34,7 @@ function fileSubmitted()
         loadVariables()
         document.getElementById("text").disabled = true
         document.getElementById("network").disabled = true
-        document.getElementById("varWrapper").hidden = false
+        document.getElementById("varWrapper").setAttribute("class", "loading")
       }
       if(fileExtension == "txt")
       {document.getElementById("text").disabled = false}
@@ -43,13 +42,14 @@ function fileSubmitted()
       {document.getElementById("network").disabled = false}
   })
   reader.readAsText(rawFile)
-
 }
 
 function clearPrevious()
 {
   rawFile = ""
   rawText = ""
+  selectedValue = 0
+  disableGraphs()
 }
 
 function disableGraphs()
@@ -85,19 +85,27 @@ function disableGraphs()
     else
     {textBut[i].disabled = false}
   }
+
+  networkBut = document.querySelectorAll('#network')
+  for(i = 0; i < networkBut.length; i++){
+    if(selectedValue != -2)
+    {networkBut[i].disabled = true}
+    else
+    {networkBut[i].disabled = false}
+  }
 }
 
 function checkCheckbox()
 {
   varNum = 0
-  selectedValue = 0 //test
+  selectedValue = 0
   cbs = document.querySelectorAll('#varOption');
  for (const cb of cbs)
  {
       if (cb.checked)
       {selectedValue++}
  }
-    disableGraphs() //test
+    disableGraphs()
 }
 
 function uncheckCheckbox(checkers)
@@ -117,6 +125,17 @@ function textOption()
 {
   selectedValue = -1
   wordcloud()
+}
+
+function okChamp()
+{
+  document.getElementById("varWrapper").setAttribute("class", "loaded")
+  setTimeout(function () {
+    document.getElementById("varWrapper").setAttribute("class","unloading")
+  }, 100);
+  setTimeout(function () {
+    document.getElementById("varWrapper").removeAttribute("class")
+  }, 1000);
 }
 
 function loadVariables()
@@ -141,6 +160,7 @@ function loadVariables()
     container.append(lab)
     container.append(document.createElement('br'))
   }
+
 }
 
 function clearGraphs()

@@ -1,7 +1,7 @@
 body
 {
   background-color: #FFF;
-  font-family: 'helvetica';
+  font-family: 'Ubuntu', sans-serif;
   text-align: center;
 }
 
@@ -12,27 +12,23 @@ p
 
 button
 {
-  background-color: #9bf6ff;
-  border: 2px solid #3b868f;
-  color: #333;
+  background-color: #00d4e1;
+  border: none;
+  border-radius: 10px;
+  color: #fff;
   padding: 15px 32px;
   text-align: center;
   text-decoration: none;
   display: inline-block;
-  font-size: 16px;
+  font-size: 20px;
+  transition: all .3s;
 }
 
 button:hover
 {
-  background-color: #7bd6df;
+  transform: scale(1.05, 1.05);
+  box-shadow: 5px 5px rgba(0,0,0,.3);
   cursor: pointer;
-}
-
-button:disabled
-{
-  background-color: #5bb6bf;
-  color: #333;
-  cursor: not-allowed;
 }
 
 #varWrapper
@@ -43,6 +39,38 @@ button:disabled
   width: 30%;
   margin: 10px;
   margin-left: 35%;
+  position:fixed;
+  background: white;
+  z-index: 5;
+  opacity: 0;
+  top: -1000px;
+  box-shadow: 10px 10px rgba(0,0,0,.3);
+}
+
+@keyframes loading
+{
+  from{opacity: 0;top: -1000px;}
+  to{opacity: 1;top: 20%;}
+}
+
+.loading
+{
+  animation-name: loading;
+  animation-duration: 1s;
+  animation-fill-mode: forwards;
+}
+
+.loaded
+{
+  opacity: 1 !important;
+  top: 20% !important;
+}
+
+.unloading
+{
+  animation-name: loading;
+  animation-duration: .9s;
+  animation-direction: reverse;
 }
 
 #variables
@@ -56,6 +84,84 @@ button:disabled
   stroke: #999;
   stroke-opacity: .6;
   stroke-width: 1px;
+}
+
+.card {
+  margin: 1rem;
+  align-items: center;
+  justify-content: center;
+  min-height: 20rem;
+}
+
+.graphButton
+{
+  height:90%;
+  width:100%;
+  border:none;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center;
+  background-color: #caffbf;
+}
+
+.graphButton:disabled
+{
+  background-color: #ffadad;
+  cursor: not-allowed;
+}
+
+
+@media screen and (min-width: 300px) {
+  .card {
+    flex: 1 1 calc(100% - 2rem);
+  }
+}
+
+@media screen and (min-width: 600px) {
+  .card {
+    flex: 1 1 calc(50% - 2rem);
+  }
+}
+
+@media screen and (min-width: 900px) {
+  .card {
+    flex: 1 1 calc(33% - 2rem);
+  }
+}
+
+#inputContainer
+{
+  position:relative;
+  color: white;
+  background-color: #00d4e1;
+  border-radius: 10px;
+  width: 15%;
+  margin-right: auto;
+  margin-left: auto;
+  font-size: 20px;
+  padding-top: 15px;
+  padding-bottom: 15px;
+  transition: all .3s;
+  margin-bottom: 10px;
+}
+
+#inputContainer:hover
+{
+  transform: scale(1.05, 1.05);
+  box-shadow: 5px 5px rgba(0,0,0,.3);
+  cursor: pointer;
+}
+
+.hiddenInput {
+    position: absolute;
+    z-index: 100;
+    opacity: 0;
+    cursor: pointer;
+    right: 0;
+    top: 0;
+    height: 100%;
+    font-size: 24px;
+    width: 100%;
 }
 
 /* Customize the label (the container) */
@@ -142,7 +248,7 @@ button:disabled
   display:flex;
   justify-content: center;
   align-items: center;
-  position: absolute;
+  position: fixed;
   width: 99%;
   height: 80%;
   z-index: 1;
@@ -156,12 +262,30 @@ button:disabled
   visibility: hidden;
 }
 
-#graphButtons
+#close
 {
   position: absolute;
-  bottom: 5%;
-  left: 0;
-  right: 0;
+  top: 0px;
+  left: 0px;
+  background-color: rgba(0,0,0,0);
+  width: 50px;
+  height: 50px;
+  background-image: url("graph_images/close.png");
+  background-repeat: no-repeat;
+  padding: 0px;
+  cursor: pointer;
+}
+
+#close:hover
+{
+  background-image: url("graph_images/linegraphimg.png");
+  background-size: contain;
+}
+
+#graphButtons
+{
+  display:flex;
+  flex-wrap:wrap;
 }
 
 .tooltip

@@ -4,41 +4,44 @@
     <meta charset="utf-8">
     <title>indev visualizer</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu&amp;display=swap" rel="stylesheet">
     <script src="https://d3js.org/d3.v4.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/holtzy/D3-graph-gallery@master/LIB/d3.layout.cloud.js"></script>
   </head>
   <body>
     <h1>Grapher for INFO 4900</h1>
     <p>todo: add drag&drop feature, make look pretty, fix bug</p>
-    <form>
-    <input onclick = "clearPrevious()" type="file" id="myFile" name="filename">
-    </form>
-    <button onclick="fileSubmitted()">Submit File</button>
+    <div id="inputContainer">
+      Select a File
+      <input class="hiddenInput" onclick = "clearPrevious()" type="file" id="myFile" name="filename">
+    </div>
+    <button onclick="fileSubmitted()">Load Variables</button>
     <br>
-  <div id="varWrapper" hidden=true>
+  <div id="varWrapper">
   <p>Choose which variables will be graphed</p>
     <div id="variables">
     </div>
     <div id="extraVariables">
       <button onclick="uncheckCheckbox(false)" id="allVar">All</button>
       <button onclick="uncheckCheckbox(true)" id="noneVar">None</button>
+      <button onclick="okChamp()" id="ok">OK</button>
     </div>
   </div>
   <br>
   <div id="graphButtons">
-    <button onclick="boxplot(); unwrap()" id="one">boxplot</button>
-    <button onclick="barplot(); unwrap()" id="two">barplot</button>
-    <button onclick="dotplot(); unwrap()" id="two">dotplot</button>
-    <button onclick="network(); unwrap()" id="network">network graph</button>
-    <button onclick="linegraph(); unwrap()" id="all">line graph</button>
-    <button onclick="streamline(); unwrap()" id="all">streamline</button>
-    <button onclick="stacked(); unwrap()" id="all">stacked graph</button>
-    <button onclick="textOption(); unwrap()" id="text">Text</button>
-
-    <button onclick="clearGraphs()">clear</button>
+    <div class="card"><button style='background-image: url("graph_images/boxplotimg.png");' onclick="boxplot(); unwrap()" id="one" class="graphButton"></button><p>boxplot</p></div>
+    <div class="card"><button style='background-image: url("graph_images/barplotimg.png");'onclick="barplot(); unwrap()" id="two" class="graphButton"></button><p>barplot</p></div>
+    <div class="card"><button style='background-image: url("graph_images/dotplotimg.png");'onclick="dotplot(); unwrap()" id="two" class="graphButton"></button><p>dotplot</p></div>
+    <div class="card"><button style='background-image: url("graph_images/networkgraphimg.png");'onclick="network(); unwrap()" id="network" class="graphButton"></button><p>network graph</p></div>
+    <div class="card"><button style='background-image: url("graph_images/linegraphimg.png");'onclick="linegraph(); unwrap()" id="all" class="graphButton"></button><p>linegraph</p></div>
+    <div class="card"><button style='background-image: url("graph_images/streamlineimg.png");'onclick="streamline(); unwrap()" id="all" class="graphButton"></button><p>streamline</p></div>
+    <div class="card"><button style='background-image: url("graph_images/stackedgraphimg.png");'onclick="stacked(); unwrap()" id="all" class="graphButton"></button><p>stacked graph</p></div>
+    <div class="card"><button style='background-image: url("graph_images/wordcloudimg.png");'onclick="textOption(); unwrap()" id="text" class="graphButton"></button><p>word cloud</p></div>
+    <div class="card"><div>
   </div>
   </br>
   <div id="wrapper">
+    <div id="close" onclick="clearGraphs()"></div>
     <div id="graphArea"></div>
     <div id="legend"></div>
   </div>
