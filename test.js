@@ -8,9 +8,15 @@ var newFile = true
 var selectedData = []
 var fileExtension
 const graphWidth  = (window.innerWidth || document.documentElement.clientWidth ||
-document.body.clientWidth) / 2;
+document.body.clientWidth) * .75;
 const graphHeight = (window.innerHeight|| document.documentElement.clientHeight||
-document.body.clientHeight) / 2;
+document.body.clientHeight) * .75;
+var margin = {top: 30, right: 30, bottom: 40, left: 100};
+var width = graphWidth - margin.left - margin.right;
+var height = graphHeight - margin.top - margin.bottom;
+var svg
+var count
+var xAxisVar
 disableGraphs()
 
 function fileSubmitted()
@@ -72,7 +78,7 @@ function disableGraphs()
 
   allBut = document.querySelectorAll('#all')
   for(i = 0; i < allBut.length; i++){
-    if(selectedValue <= 0)
+    if(selectedValue < 1)
     {allBut[i].disabled = true}
     else
     {allBut[i].disabled = false}
@@ -99,11 +105,29 @@ function checkCheckbox()
 {
   varNum = 0
   selectedValue = 0
+  cbCount = 0
   cbs = document.querySelectorAll('#varOption');
+  xAxisVar = document.getElementsByClassName("dropdown")[0].value
  for (const cb of cbs)
  {
       if (cb.checked)
       {selectedValue++}
+      if(cb.labels[0].textContent == xAxisVar && cb.checked)
+      {
+        cb.checked = false
+        selectedValue--
+      }
+      if(cb.labels[0].textContent == xAxisVar)
+      {
+        document.getElementsByClassName("checkLabel")[cbCount].style.backgroundColor = "lightgrey"
+        document.getElementsByClassName("checkLabel")[cbCount].style.cursor = "not-allowed"
+      }
+      else
+      {
+        document.getElementsByClassName("checkLabel")[cbCount].style.backgroundColor = "white"
+        document.getElementsByClassName("checkLabel")[cbCount].style.cursor = "pointer"
+      }
+      cbCount++
  }
     disableGraphs()
 }
@@ -118,6 +142,7 @@ function uncheckCheckbox(checkers)
       if(!checkers)
       {selectedValue++}
   }
+  checkCheckbox()
   disableGraphs()
 }
 
@@ -129,10 +154,12 @@ function textOption()
 
 function okChamp()
 {
+  xAxisVar = document.getElementsByClassName("dropdown")[0].selectedIndex
   document.getElementById("varWrapper").setAttribute("class", "loaded")
   setTimeout(function () {
     document.getElementById("varWrapper").setAttribute("class","unloading")
   }, 100);
+  document.getElementById("spiteWrap").style.filter = "blur(0)"
   setTimeout(function () {
     document.getElementById("varWrapper").removeAttribute("class")
   }, 1000);
@@ -160,7 +187,23 @@ function loadVariables()
     container.append(lab)
     container.append(document.createElement('br'))
   }
+  document.getElementById("spiteWrap").style.filter = "blur(5px)"
+  showDropdown()
+  checkCheckbox()
+}
 
+function showDropdown() {
+  var dropdowns = document.getElementsByClassName("dropdown")
+  var dropdownLength = dropdowns[0].options.length
+  for(var i = dropdownLength - 1; i >= 0; i--)
+    {dropdowns[0].options[i] = null}
+  for (var i = 0; i < count; i++)
+  {
+    lab = document.createElement('option')
+    lab.textContent = data.columns[i]
+    dropdowns[0].append(lab)
+    dropdowns[0].append(document.createElement('br'))
+  }
 }
 
 function clearGraphs()
@@ -175,29 +218,26 @@ function clearGraphs()
                 if (cb.checked)
                 {selectedData.push(cb.name)}
             }
+
+  svg = d3.select(g)
+  .append("svg")
+    .classed("graph", true)
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+      .attr("transform",
+            "translate(" + margin.left + "," + margin.top + ")");
 }
 
 function unwrap()
 {
   document.getElementById("wrapper").style.visibility = "visible";
+  document.getElementById("graphTitle").value = "Insert Title Here"
 }
 
 function boxplot()
 {
   clearGraphs()
-  var margin = {top: 10, right: 30, bottom: 30, left: 40},
-    width = graphWidth - margin.left - margin.right,
-    height = graphHeight - margin.top - margin.bottom;
-
-  var svg = d3.select(g)
-  .append("svg")
-    .classed("graph", true)
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-  .append("g")
-    .attr("transform",
-          "translate(" + margin.left + "," + margin.top + ")");
-
   var data = d3.csvParse(rawText)
 
   var max = d3.max(data, function(d) {return +d[data.columns[selectedData]]})
@@ -211,10 +251,8 @@ function boxplot()
   var y = d3.scaleLinear()
     .domain([min,max])
     .range([height, 0]);
-  svg.call(d3.axisLeft(y))
 
-  var center = 200
-  var width = 100
+  var center = (width/2)
 
   svg
   .append("line")
@@ -224,12 +262,20 @@ function boxplot()
     .attr("y2", y(max) )
     .attr("stroke", "black")
 
+  svg.append("g")
+    .call(d3.axisLeft(y));
+    svg.append("text")
+      .attr("text-anchor", "end")
+      .attr("x", 0)
+      .attr("y", -10)
+      .text(""+data.columns[selectedData])
+
   svg
   .append("rect")
-    .attr("x", center - width/2)
+    .attr("x", center - center/8)
     .attr("y", y(q3) )
     .attr("height", (y(q1)-y(q3)) )
-    .attr("width", width )
+    .attr("width", center/4)
     .attr("stroke", "black")
     .style("fill", "#69b3a2")
 
@@ -238,8 +284,8 @@ function boxplot()
   .data([min, median, max])
   .enter()
   .append("line")
-    .attr("x1", center-width/2)
-    .attr("x2", center+width/2)
+    .attr("x1", center-width/8)
+    .attr("x2", center+width/8)
     .attr("y1", function(d){ return(y(d))} )
     .attr("y2", function(d){ return(y(d))} )
     .attr("stroke", "black")
@@ -248,25 +294,12 @@ function boxplot()
 function barplot()
 {
   clearGraphs()
-  // set the dimensions and margins of the graph
-var margin = {top: 30, right: 30, bottom: 70, left: 60},
-    width = graphWidth - margin.left - margin.right,
-    height = graphHeight - margin.top - margin.bottom;
-
-var svg = d3.select(g)
-  .append("svg")
-    .classed("graph", true)
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-  .append("g")
-    .attr("transform",
-          "translate(" + margin.left + "," + margin.top + ")");
 
 data = d3.csvParse(rawText)
 
 var x = d3.scaleBand()
   .range([ 0, width ])
-  .domain(data.map(function(d) { return d[data.columns[selectedData[0]]]; }))
+  .domain(data.map(function(d) { return d[data.columns[xAxisVar]]; }))
   .padding(0.2);
 svg.append("g")
   .attr("transform", "translate(0," + height + ")")
@@ -274,50 +307,53 @@ svg.append("g")
   .selectAll("text")
     .attr("transform", "translate(-10,0)rotate(-45)")
     .style("text-anchor", "end");
+    svg.append("text")
+      .attr("text-anchor", "end")
+      .attr("x", width)
+      .attr("y", height+40 )
+      .text(""+data.columns[xAxisVar])
 
 var y = d3.scaleLinear()
-  .domain([0, d3.max(data, function(d) {return +d[data.columns[selectedData[1]]]})])
+  .domain([0, d3.max(data, function(d) {return +d[data.columns[selectedData[0]]]})])
   .range([ height, 0]);
 svg.append("g")
   .call(d3.axisLeft(y));
+  svg.append("text")
+    .attr("text-anchor", "end")
+    .attr("x", 50)
+    .attr("y", -10)
+    .text(""+data.columns[selectedData[0]])
 
 svg.selectAll("mybar")
   .data(data)
   .enter()
   .append("rect")
-    .attr("x", function(d) { return x(d[data.columns[selectedData[0]]]); })
-    .attr("y", function(d) { return y(d[data.columns[selectedData[1]]]); })
+    .attr("x", function(d) { return x(d[data.columns[xAxisVar]]); })
+    .attr("y", function(d) { return y(d[data.columns[selectedData[0]]]); })
     .attr("width", x.bandwidth())
-    .attr("height", function(d) { return height - y(d[data.columns[selectedData[1]]]); })
+    .attr("height", function(d) { return height - y(d[data.columns[selectedData[0]]]); })
     .attr("fill", "#69b3a2")
 }
 
 function dotplot()
 {
   clearGraphs()
-  var margin = {top: 10, right: 30, bottom: 30, left: 60},
-      width = graphWidth - margin.left - margin.right,
-      height = graphHeight - margin.top - margin.bottom;
-
-  var svg = d3.select(g)
-    .append("svg")
-      .classed("graph", true)
-      .attr("width", width + margin.left + margin.right)
-      .attr("height", height + margin.top + margin.bottom)
-    .append("g")
-      .attr("transform",
-            "translate(" + margin.left + "," + margin.top + ")");
 
     data = d3.csvParse(rawText)
     var x = d3.scaleLinear()
-      .domain([0, d3.max(data, function(d) {return +d[data.columns[selectedData[0]]]} )])
+      .domain([0, d3.max(data, function(d) {return +d[data.columns[xAxisVar]]} )])
       .range([ 0, width ]);
     svg.append("g")
       .attr("transform", "translate(0," + height + ")")
       .call(d3.axisBottom(x));
+      svg.append("text")
+        .attr("text-anchor", "end")
+        .attr("x", width)
+        .attr("y", height+30 )
+        .text(""+data.columns[xAxisVar])
 
     var y = d3.scaleLinear()
-      .domain([0, d3.max(data, function(d) {return +d[data.columns[selectedData[1]]]} )])
+      .domain([0, d3.max(data, function(d) {return +d[data.columns[selectedData[0]]]} )])
       .range([ height, 0]);
     svg.append("g")
       .call(d3.axisLeft(y));
@@ -326,10 +362,15 @@ function dotplot()
       .data(data)
       .enter()
       .append("circle")
-        .attr("cx", function (d) { return x(d[data.columns[selectedData[0]]]); } )
-        .attr("cy", function (d) { return y(d[data.columns[selectedData[1]]]); } )
+        .attr("cx", function (d) { return x(d[data.columns[xAxisVar]]); } )
+        .attr("cy", function (d) { return y(d[data.columns[selectedData[0]]]); } )
         .attr("r", 4)
         .style("fill", "#69b3a2")
+    svg.append("text")
+      .attr("text-anchor", "end")
+      .attr("x", 10)
+      .attr("y", -10)
+      .text(""+data.columns[selectedData[0]])
 }
 
 function wordcloud()
@@ -361,14 +402,6 @@ myWords = Object.keys(orig)
 var margin = {top: 10, right: 10, bottom: 10, left: 10},
     width = graphWidth - margin.left - margin.right,
     height = graphHeight - margin.top - margin.bottom;
-
-// append the svg object to the body of the page
-var svg = d3.select(g).append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-  .append("g")
-    .attr("transform",
-          "translate(" + margin.left + "," + margin.top + ")");
 
 // Constructs a new cloud layout instance. It run an algorithm to find the position of words that suits your requirements
 var layout = d3.layout.cloud()
@@ -404,21 +437,6 @@ function streamline()
 {
   clearGraphs()
 
-  // set the dimensions and margins of the graph
-var margin = {top: 20, right: 30, bottom: 30, left: 60},
-    width = graphWidth - margin.left - margin.right,
-    height = 1.3*graphHeight - margin.top - margin.bottom;
-
-
-// append the svg object to the body of the page
-var svg = d3.select(g)
-  .append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-  .append("g")
-    .attr("transform",
-          "translate(" + margin.left + "," + margin.top + ")");
-
   // create a tooltip
     var Tooltip = d3.select("#graphArea")
       .append("div")
@@ -441,8 +459,8 @@ var svg = d3.select(g)
     var mousemove = function(d) {
       Tooltip
         .html(d.key)
-        .style("left", (event.pageX + 20) + "px")
-        .style("top", (event.pageY - 10) + "px")
+        .style("left", (event.clientX + 20) + "px")
+        .style("top", (event.clientY - 10) + "px")
     }
     var mouseleave = function(d) {
       Tooltip
@@ -457,14 +475,14 @@ data = d3.csvParse(rawText)
 
   // List of groups = header of the csv files
   var keys = []
-  for(i = 1; i < selectedData.length; i++)
+  for(i = 0; i < selectedData.length; i++)
   {keys.push(data.columns[selectedData[i]])}
 
   total_max = 0
-  for(i = 1; i < selectedData.length; i++)
-  {total_max += d3.max(data, function(d) {return +d[data.columns[i]]})}
-  max_time = d3.max(data, function(d) {return +d[data.columns[0]]})
-  min_time = d3.min(data, function(d) {return +d[data.columns[0]]})
+  for(i = 0; i < selectedData.length; i++)
+  {total_max += d3.max(data, function(d) {return +d[data.columns[selectedData[i]]]})}
+  max_time = d3.max(data, function(d) {return +d[data.columns[xAxisVar]]})
+  min_time = d3.min(data, function(d) {return +d[data.columns[xAxisVar]]})
   avg_time = (max_time + min_time) / 2
   q1 = (min_time+avg_time)/2
   q3 = (max_time+avg_time)/2
@@ -486,8 +504,7 @@ data = d3.csvParse(rawText)
     .attr("text-anchor", "end")
     .attr("x", width)
     .attr("y", height+30 )
-    .text(""+data.columns[0])
-
+    .text(""+data.columns[xAxisVar])
   // Add Y axis
   var y = d3.scaleLinear()
     .domain([-.5*total_max, .5*total_max])
@@ -543,7 +560,7 @@ data = d3.csvParse(rawText)
     .append("path")
       .style("fill", function(d) { return color(d.key); })
       .attr("d", d3.area()
-        .x(function(d, i) { return x(d.data[data.columns[0]]); })
+        .x(function(d, i) { return x(d.data[data.columns[xAxisVar]]); })
         .y0(function(d) { return y(d[0]); })
         .y1(function(d) { return y(d[1]); })
     )
@@ -562,37 +579,24 @@ function stacked()
 function linegraph()
 {
   clearGraphs()
-  // set the dimensions and margins of the graph
-  var margin = {top: 20, right: 30, bottom: 30, left: 60},
-      width = graphWidth - margin.left - margin.right,
-      height = 1.3*graphHeight - margin.top - margin.bottom;
-
-// append the svg object to the body of the page
-var svg = d3.select(g)
-  .append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-  .append("g")
-    .attr("transform",
-          "translate(" + margin.left + "," + margin.top + ")");
 
 //Read the data
 data = d3.csvParse(rawText)
 
 // List of groups = header of the csv files
 var keys = []
-for(i = 1; i < selectedData.length; i++)
+for(i = 0; i < selectedData.length; i++)
 {keys.push(data.columns[selectedData[i]])}
 
 total_max = 0
-for(i = 1; i < selectedData.length; i++)
+for(i = 0; i < selectedData.length; i++)
 {
-  tmep = d3.max(data, function(d) {return +d[data.columns[i]]})
+  tmep = d3.max(data, function(d) {return +d[data.columns[selectedData[i]]]})
   if(total_max < tmep)
   {total_max = tmep}
 }
-max_time = d3.max(data, function(d) {return +d[data.columns[0]]})
-min_time = d3.min(data, function(d) {return +d[data.columns[0]]})
+max_time = d3.max(data, function(d) {return +d[data.columns[xAxisVar]]})
+min_time = d3.min(data, function(d) {return +d[data.columns[xAxisVar]]})
 
 // colors
 tempColors = []
@@ -600,17 +604,18 @@ for(i = 0; i < keys.length; i++)
 {
   tempColors.push("rgba("+ Math.round(Math.random()*128+128)+","+Math.round(Math.random()*128+128)+","+Math.round(Math.random()*128+128)+",.9)")
 }
-var color = d3.scaleOrdinal()
-  .domain(keys)
-  .range(tempColors)
-
   // Add X axis
   var x = d3.scaleLinear()
-    .domain(d3.extent(data, function(d) {return +d[data.columns[0]]; }))
+    .domain(d3.extent(data, function(d) {return +d[data.columns[xAxisVar]]; }))
     .range([ 0, width ]);
   svg.append("g")
     .attr("transform", "translate(0," + height + ")")
     .call(d3.axisBottom(x).ticks(5));
+    svg.append("text")
+      .attr("text-anchor", "end")
+      .attr("x", width)
+      .attr("y", height+30 )
+      .text(""+data.columns[xAxisVar])
 
   // Add Y axis
   var y = d3.scaleLinear()
@@ -620,27 +625,27 @@ var color = d3.scaleOrdinal()
     .call(d3.axisLeft(y));
 
   // Draw the line
-  for(i = 1; i <= keys.length; i++)
+  for(i = 0; i < keys.length; i++)
   {
   svg.selectAll(".line")
       .data([data])
       .enter()
       .append("path")
         .attr("d", d3.line()
-          .x(function(d){return x(+d[data.columns[selectedData[0]]]) })
+          .x(function(d){return x(+d[data.columns[xAxisVar]]) })
           .y(function(d){return y(+d[data.columns[selectedData[i]]]) })
       )
         .attr("fill", "none")
-        .attr("stroke", function(d){ return tempColors[i-1] })
+        .attr("stroke", function(d){ return tempColors[i] })
         .attr("stroke-width", 3)
   }
 
   divlegend = document.getElementById("legend")
-  for(i = 1; i < selectedData.length; i++)
+  for(i = 0; i < selectedData.length; i++)
   {
     legend = document.createElement("p")
     legend.textContent = data.columns[selectedData[i]]
-    legend.style.backgroundColor = tempColors[i-1]
+    legend.style.backgroundColor = tempColors[i]
     legend.style.width = "200px"
     legend.style.padding = "10px"
 
@@ -653,24 +658,12 @@ function network()
 {
   clearGraphs()
 
-  var margin = {top: 20, right: 30, bottom: 30, left: 60},
-      width = graphWidth - margin.left - margin.right,
-      height = 1.3*graphHeight - margin.top - margin.bottom;
-
 var colors = d3.scaleOrdinal(d3.schemeCategory10)
 
 var simulation = d3.forceSimulation()
         .force("link", d3.forceLink().id(function (d) {return d.id;}).distance(100).strength(1))
         .force("charge", d3.forceManyBody())
         .force("center", d3.forceCenter(width / 2, height / 2));
-
-var svg = d3.select(g)
-  .append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-  .append("g")
-    .attr("transform",
-          "translate(" + margin.left + "," + margin.top + ")");
 
 var json = JSON.parse(rawText)
 console.log(json)
